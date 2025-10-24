@@ -95,7 +95,7 @@ class ProductController extends Controller
             Photo::whereIn('id', $request->deleted_photos)->delete();   //borramos fotos
         }
         foreach ($request->new_photos as $image) {  //agregamos nuevas fotos
-            $urlImage = "/storage/".$image->store('images/products', 'public');
+            $urlImage = "storage/".$image->store('images/products', 'public');
             $photo=Photo::create([
                 'url' => $urlImage,
                 'description' => 'Imagen del producto '.$validated['name'],

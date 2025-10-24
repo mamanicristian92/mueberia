@@ -47,7 +47,7 @@ interface ProductType {
 
 export default function Edit({product, productTypes}: {product: Product[], productTypes: ProductType[]}) {
 
-    const {data, setData, put, processing, errors} = useForm({
+    const {data, setData, post, processing, errors} = useForm({
         id: product.id,
         name: product.name,
         description: product.description,
@@ -57,17 +57,17 @@ export default function Edit({product, productTypes}: {product: Product[], produ
         photos: product.photos,
         deleted_photos: [] as number[],
         new_photos: [],
-        _method: 'put',
+        _method: 'put', //este es :)
     })
 
     const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log(data);
-        //put(route('products.update',product.id));
-        router.post(`/products/${product.id}`, {
-            _method: 'put',
-            body: data,
-        })
+
+        post(route('products.update', product.id), {
+            forceFormData: true,
+            body:data,
+        });
     }
 
     const handleDeletePhoto = (photoId: number) => {
