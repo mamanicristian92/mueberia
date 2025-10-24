@@ -65,8 +65,8 @@ export default function Edit({product, productTypes}: {product: Product[], produ
         console.log(data);
 
         post(route('products.update', product.id), {
-            forceFormData: true,
-            body:data,
+            //forceFormData: true,
+            //body:data,
         });
     }
 
