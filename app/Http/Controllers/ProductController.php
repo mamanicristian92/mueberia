@@ -41,7 +41,7 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         //
-        Log::channel('test')->info("StoreProductRequest called");
+        Log::channel('test')->info("StoreProduct called");
         $validated = $request->validated();
         Product::create($validated);
         if ($request->hasFile('images')) {
@@ -88,7 +88,7 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
         //
-        Log::channel('test')->info("UpdateProductRequest called");
+        Log::channel('test')->info("UpdateProduct called");
         $validated = $request->validated();
         $product->update($validated);
         if ($request->deleted_photos) {

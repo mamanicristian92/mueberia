@@ -57,6 +57,7 @@ export default function Edit({product, productTypes}: {product: Product[], produ
         photos: product.photos,
         deleted_photos: [] as number[],
         new_photos: [],
+        _method: 'put',
     })
 
     const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
@@ -65,8 +66,8 @@ export default function Edit({product, productTypes}: {product: Product[], produ
         //put(route('products.update',product.id));
         router.post(`/products/${product.id}`, {
             _method: 'put',
-            product: data,
-        });
+            body: data,
+        })
     }
 
     const handleDeletePhoto = (photoId: number) => {
