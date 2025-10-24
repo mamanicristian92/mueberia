@@ -11,9 +11,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useState } from 'react';
-
+} from "@/components/ui/select";
+import { CircleX } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,35 +22,75 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+interface Product {
+    id: number;
+    name: string;
+    description: string;
+    stock: number;
+    price: number;
+    product_type_id: number;
+    type: {
+        id: number;
+        name: string;
+    };
+    photos: Array<{
+        id: number;
+        url: string;
+    }>;
+}
+
 interface ProductType {
     id: number;
     name: string;
     description: string;
 }
 
-export default function Create({productTypes}: {productTypes: ProductType[]}) {
+export default function Edit({product, productTypes}: {product: Product[], productTypes: ProductType[]}) {
 
-    const {data, setData, post, processing, errors} = useForm({
-        name: '',
-        description: '',
-        stock: '',
-        price: '',
-        product_type_id: '',
-        images: [],
+    const {data, setData, put, processing, errors} = useForm({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        stock: product.stock,
+        price: product.price,
+        product_type_id: product.product_type_id,
+        photos: product.photos,
+        deleted_photos: [] as number[],
+        new_photos: [],
     })
 
-    const [selectedFile, setSelectedFile] = useState(null);
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        post(route('products.store'));
+        console.log(data);
+        //put(route('products.update',product.id));
+        router.post(`/products/${product.id}`, {
+            _method: 'put',
+            product: data,
+        });
+    }
+
+    const handleDeletePhoto = (photoId: number) => {
+        // Remove photo from photos array
+        setData('photos', data.photos.filter(photo => photo.id !== photoId));
+        // Add photo id to deleted_photos array
+        setData('deleted_photos', [...data.deleted_photos, photoId]);
+        console.log(data.deleted_photos);
+        console.log(data);
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log(data);
+        if (e.target.files) {
+            setData('new_photos', e.target.files);
+        }
+        console.log(data);
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products | Create" />
             <div className='p-4 max-w-md'>
-                <form onSubmit={handleSubmit} method='post' className='space-y-4' encType='multipart/form-data'>
+                <form onSubmit={handleUpdate} method='post' className='space-y-4' encType='multipart/form-data'>
                     <div className='gap-1.5'>
                         <Input
                             placeholder='Nombre'
@@ -90,6 +130,7 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                     <div className='gap-1.5'>
                         <Select
                             onValueChange={value => setData('product_type_id', value)}
+                            value={data.product_type_id.toString()}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Tipo de Producto" />
@@ -127,21 +168,48 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                             </div>
                         )}
                     </div>
+
+                    {/* Agregar nuevas fotos */}
                     <div className='gap-1.5'>
                         <Input
                             className="text-gray-700"
                             type='file'
-                            onChange={e => setData('images', e.target.files)}
+                            onChange={handleFileChange}
                             multiple
                         ></Input>
-                        {errors.images && (
+                        {errors.new_photos && (
                             <div className='flex items-center text-red-500 text-sm mt-1'>
-                                {errors.images}
+                                {errors.new_photos}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* eliminar fotos */}
+                    <div className='gap-1.5'>
+                        {data.photos.length > 0 && (
+                            <div className='flex flex-wrap gap-2 mb-2'>
+                                {data.photos.map((photo, index) => (
+                                    <div className="relative"
+                                        key={index}
+                                        >
+                                        <img
+                                            src={"/"+photo.url}
+                                            alt={`Preview ${index + 1}`}
+                                            className='w-50 h-50 object-cover rounded-md'
+                                        />
+                                        <button className="absolute top-1 right-1 bg-white rounded-2xl text-black"
+                                            type="button"
+                                            onClick={() => handleDeletePhoto(photo.id)}
+                                        >
+                                            <CircleX size={20}/>
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
                     <Button disabled={processing} type='submit'>
-                        Create Product
+                        Guardar
                     </Button>
                 </form>
             </div>

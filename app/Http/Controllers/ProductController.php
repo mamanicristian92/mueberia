@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use Inertia\Inertia;
 use App\Models\ProductType;
+use App\Models\Photo;
+use Log;
 
 class ProductController extends Controller
 {
@@ -39,8 +41,21 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         //
+        Log::channel('test')->info("StoreProductRequest called");
         $validated = $request->validated();
         Product::create($validated);
+        if ($request->hasFile('images')) {
+            $images=$request->file('images');
+            foreach ($images as $image) {
+                $urlImage = "storage/".$image->store('images/products', 'public');
+                $photo=Photo::create([
+                    'url' => $urlImage,
+                    'description' => 'Imagen del producto '.$validated['name'],
+                ]);
+                $photo->products()->attach(Product::latest()->first()->id);
+            }
+        }        
+
         return redirect()->route('products.index');
     }
 
@@ -50,6 +65,9 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         //
+        return Inertia::render('products/show', [
+            'product' => $product->load('type', 'photos'),
+        ]);
     }
 
     /**
@@ -58,6 +76,10 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         //
+        return Inertia::render('products/edit', [
+            'product' => $product->load('type', 'photos'),
+            'productTypes' => ProductType::all()
+        ]);
     }
 
     /**
@@ -66,6 +88,21 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
         //
+        Log::channel('test')->info("UpdateProductRequest called");
+        $validated = $request->validated();
+        $product->update($validated);
+        if ($request->deleted_photos) {
+            Photo::whereIn('id', $request->deleted_photos)->delete();   //borramos fotos
+        }
+        foreach ($request->new_photos as $image) {  //agregamos nuevas fotos
+            $urlImage = "/storage/".$image->store('images/products', 'public');
+            $photo=Photo::create([
+                'url' => $urlImage,
+                'description' => 'Imagen del producto '.$validated['name'],
+            ]);
+            $photo->products()->attach($product->id);   //asociamos foto al producto
+        }
+        return redirect()->route('products.index');
     }
 
     /**

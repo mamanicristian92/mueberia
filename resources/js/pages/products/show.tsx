@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useState } from 'react';
+import { CircleX } from 'lucide-react';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -22,25 +22,32 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface ProductType {
+interface Product {
     id: number;
     name: string;
     description: string;
+    stock: number;
+    price: number;
+    type: {
+        id: number;
+        name: string;
+    };
+    photos: Array<{
+        id: number;
+        url: string;
+    }>;
 }
 
-export default function Create({productTypes}: {productTypes: ProductType[]}) {
+export default function View({product}: {product: Product}) {
 
     const {data, setData, post, processing, errors} = useForm({
-        name: '',
-        description: '',
-        stock: '',
-        price: '',
-        product_type_id: '',
-        images: [],
+        name: product.name,
+        description: product.description,
+        stock: product.stock,
+        price: product.price,
+        type: product.type,
+        photos: product.photos,
     })
-
-    const [selectedFile, setSelectedFile] = useState(null);
-
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         post(route('products.store'));
@@ -55,7 +62,7 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                         <Input
                             placeholder='Nombre'
                             value={data.name}
-                            onChange={e => setData('name', e.target.value)}
+                            disabled
                         ></Input>
                         {errors.name && (
                             <div className='flex items-center text-red-500 text-sm mt-1'>
@@ -67,7 +74,7 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                         <Input
                             placeholder='Stock'
                             value={data.stock}
-                            onChange={e => setData('stock', e.target.value)}
+                            disabled
                         ></Input>
                         {errors.stock && (
                             <div className='flex items-center text-red-500 text-sm mt-1'>
@@ -79,7 +86,7 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                         <Input
                             placeholder='Precio'
                             value={data.price}
-                            onChange={e => setData('price', e.target.value)}
+                            disabled
                         ></Input>
                         {errors.price && (
                             <div className='flex items-center text-red-500 text-sm mt-1'>
@@ -88,30 +95,14 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                         )}
                     </div>
                     <div className='gap-1.5'>
-                        <Select
-                            onValueChange={value => setData('product_type_id', value)}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Tipo de Producto" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {<SelectItem
-                                    key="0"
-                                    value="0">
-                                    {"Tipo de producto"}
-                                </SelectItem>}
-                                {productTypes.map((type) => (
-                                    <SelectItem
-                                        key={type.id}
-                                        value={type.id.toString()}>
-                                        {type.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        {errors.product_type_id && (
+                        <Input
+                            placeholder='Precio'
+                            value={data.type.name}
+                            disabled
+                        ></Input>
+                        {errors.price && (
                             <div className='flex items-center text-red-500 text-sm mt-1'>
-                                {errors.product_type_id}
+                                {errors.price}
                             </div>
                         )}
                     </div>
@@ -119,7 +110,7 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                         <Textarea 
                             placeholder="Descripción"
                             value={data.description}
-                            onChange={e => setData('description', e.target.value)} 
+                            disabled
                         />
                         {errors.description && (
                             <div className='flex items-center text-red-500 text-sm mt-1'>
@@ -128,15 +119,21 @@ export default function Create({productTypes}: {productTypes: ProductType[]}) {
                         )}
                     </div>
                     <div className='gap-1.5'>
-                        <Input
-                            className="text-gray-700"
-                            type='file'
-                            onChange={e => setData('images', e.target.files)}
-                            multiple
-                        ></Input>
-                        {errors.images && (
-                            <div className='flex items-center text-red-500 text-sm mt-1'>
-                                {errors.images}
+                        {data.photos.length > 0 && (
+                            <div className='flex flex-wrap gap-2 mb-2'>
+                                {data.photos.map((photo, index) => (
+                                    <div className="relative">
+                                        <img
+                                            key={index}
+                                            src={"/"+photo.url}
+                                            alt={`Preview ${index + 1}`}
+                                            className='w-50 h-50 object-cover rounded-md'
+                                        />
+                                        <button className="absolute top-1 right-1 bg-white rounded-2xl text-black">
+                                            <CircleX size={20}/>
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

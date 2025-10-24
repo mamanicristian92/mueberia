@@ -63,9 +63,8 @@ export default function Index({products}: {products: ProductsPaginated}) {
                                     <TableCell>{product.name}</TableCell>
                                     <TableCell>{product.description}</TableCell>
                                     <TableCell>{product.stock}</TableCell>
-                                    <TableCell>{product.price}</TableCell>
+                                    <TableCell>{new Intl.NumberFormat('en-us', {minimumFractionDigits: 2}).format(product.price)}</TableCell>
                                     <TableCell>{product.type.name}</TableCell>
-                                    
                                     <TableCell className="text-right space-x-2">
                                         <Link /* href={route('products.edit', product.id)} */>
                                             <Button className='bg-slate-500 hover:bg-slate-700'>Edit</Button>
